@@ -251,8 +251,8 @@
     ],
     [
         "data/launcher-ui/assets/js/app/main.js",
-        66341,
-        "DAAA01D2D8DB5D65390F719132A23CBAF17D6720"
+        65367,
+        "853A5515A75F41973305216E5653783209CA9667"
     ],
     [
         "data/launcher-ui/assets/js/app/views.js",
@@ -276,28 +276,28 @@
     ],
     [
         "data/launcher-ui/assets/js/popups/component-selection-popup.js",
-        23418,
-        "25723B4433ED695AF111D85C86657F1158D7C9C8"
+        23021,
+        "DD8E01CA620661A3B85AB1F0EE37D97A45F84022"
     ],
     [
         "data/launcher-ui/assets/js/popups/game-mode-popup.js",
-        7301,
-        "D22D546393462E1280A9CF25EFA0654986508ADE"
+        7132,
+        "90A0059EC5F1FFFC9E6AC7C6E8F2E5BF6F406726"
     ],
     [
         "data/launcher-ui/assets/js/popups/game-settings-popup.js",
-        21573,
-        "9782BFB6E3E33978D210CFADA5CD62AD695F2B02"
+        21228,
+        "C66B03D2B1E73F0C67C334BEF4E67178289191D4"
     ],
     [
         "data/launcher-ui/assets/js/popups/setup-flow-popup.js",
-        24625,
-        "5A267F5FDF512E78ABA282F78EBA215A56B26899"
+        24248,
+        "D2AA4B66419644E32D54D6CEF5A8ED670D95F0CD"
     ],
     [
         "data/launcher-ui/assets/js/ui/message-box.js",
-        1634,
-        "0A26015971426B086178ECFE3B8F5B5E4B1D19E1"
+        1591,
+        "55E975E66AD0BB60C053A527B5EB05A59AE5F806"
     ],
     [
         "data/launcher-ui/main.html",
