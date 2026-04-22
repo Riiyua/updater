@@ -2287,6 +2287,26 @@ body:not(.hidden) { opacity: 1; transition: opacity 0.3s ease; }
 .component-selection-popup .popup-header { padding: 22px 24px; }
 .component-selection-popup .popup-content { padding: 22px 24px; overflow-y: auto; flex: 1; }
 
+.component-selection-popup .component-install-path-section {
+    padding: 14px;
+    background: var(--surface-lo);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+
+.component-selection-popup .component-install-path-section .input-group {
+    display: flex;
+    gap: 10px;
+}
+
+.component-selection-popup .component-install-path-section input {
+    min-width: 0;
+}
+
+.component-selection-popup .component-install-path-section .browse-button {
+    white-space: nowrap;
+}
+
 .component-selection-popup .component-selection-section { margin-bottom: 18px; }
 
 .component-selection-popup .section-header {

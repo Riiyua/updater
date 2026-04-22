@@ -11,6 +11,7 @@ class ComponentSelectionPopup {
         this.componentSizes = {};
         this.availableSpace = 0;
         this.options = {};
+        this.installPath = '';
         this.createPopup();
     }
 
@@ -27,6 +28,13 @@ class ComponentSelectionPopup {
                 <button class="popup-close">&times;</button>
             </div>
             <div class="popup-content">
+                <div class="install-path-section component-install-path-section" id="component-install-path-section" hidden>
+                    <label id="component-install-location-label">Install Location</label>
+                    <div class="input-group">
+                        <input type="text" id="component-install-path" readonly />
+                        <button class="browse-button" id="component-install-browse" type="button">Browse</button>
+                    </div>
+                </div>
                 <div class="component-selection-section">
                     <div class="section-header">
                         <label id="component-manage-label">Manage Install</label>
@@ -79,6 +87,9 @@ class ComponentSelectionPopup {
         this.popup.querySelector('#component-download-info-label').textContent = this.t('popup.componentSelection.downloadInfo');
         this.popup.querySelector('#component-projected-size-label').textContent = this.t('popup.componentSelection.projectedSize');
         this.popup.querySelector('#component-available-space-label').textContent = this.t('popup.componentSelection.availableSpace');
+        this.popup.querySelector('#component-install-location-label').textContent = this.t('popup.componentSelection.installLocation');
+        this.popup.querySelector('#component-install-browse').textContent = this.t('common.browse');
+        this.popup.querySelector('#component-install-path').placeholder = this.t('popup.componentSelection.chooseInstallLocation');
         this.popup.querySelector('#download-size').textContent = this.t('popup.componentSelection.calculating');
         this.popup.querySelector('#available-space').textContent = this.t('popup.componentSelection.calculating');
         this.popup.querySelector('.btn-uninstall').textContent = this.t('popup.componentSelection.uninstall');
@@ -92,12 +103,14 @@ class ComponentSelectionPopup {
         const applyBtn = this.popup.querySelector('.btn-apply');
         const refreshBtn = this.popup.querySelector('.btn-refresh');
         const uninstallBtn = this.popup.querySelector('.btn-uninstall');
+        const browseBtn = this.popup.querySelector('#component-install-browse');
 
         closeBtn.addEventListener('click', () => this.hide());
         cancelBtn.addEventListener('click', () => this.hide());
         applyBtn.addEventListener('click', () => this.applyChanges());
         refreshBtn.addEventListener('click', () => this.refreshDetection());
         uninstallBtn.addEventListener('click', () => this.uninstallGame());
+        browseBtn.addEventListener('click', () => this.browseInstallPath());
 
         this.backdrop.addEventListener('click', (e) => {
             if (e.target === this.backdrop) {
@@ -115,7 +128,9 @@ class ComponentSelectionPopup {
             startDownloadOnApply: false,
             ...options
         };
+        this.installPath = '';
         this.refreshTexts();
+        this.updateInstallPathSection();
 
         // Update title
         const title = this.popup.querySelector('#component-title');
@@ -199,9 +214,12 @@ class ComponentSelectionPopup {
             game: this.currentGame,
             suffix: PROPERTY_KEYS.GAME.INSTALL
         });
+        this.installPath = installPath || '';
+        this.updateInstallPathSection();
+
         this.availableSpace = 0;
-        if (installPath) {
-            const spaceInfo = await window.executeCommand('get-available-space', { path: installPath });
+        if (this.installPath) {
+            const spaceInfo = await window.executeCommand('get-available-space', { path: this.installPath });
             this.availableSpace = spaceInfo?.availableSpace || 0;
         }
 
@@ -230,6 +248,42 @@ class ComponentSelectionPopup {
         // Render components
         this.renderComponents();
         this.updateSummary();
+    }
+
+    requiresInstallPath() {
+        return this.options.startDownloadOnApply === true;
+    }
+
+    updateInstallPathSection() {
+        const section = this.popup.querySelector('#component-install-path-section');
+        const input = this.popup.querySelector('#component-install-path');
+
+        if (!section || !input) return;
+
+        section.hidden = !this.requiresInstallPath();
+        input.value = this.installPath || '';
+    }
+
+    getDefaultDownloadPath(folder) {
+        const defaultInstallPath = this.gameConfig ? this.gameConfig.defaultInstallPath : '';
+        return defaultInstallPath ? `${folder}\\${defaultInstallPath}` : folder;
+    }
+
+    async browseInstallPath() {
+        try {
+            const folder = await window.executeCommand('browse-folder');
+            if (!folder) return;
+
+            this.installPath = this.getDefaultDownloadPath(folder);
+            this.updateInstallPathSection();
+
+            this.availableSpace = 0;
+            const spaceInfo = await window.executeCommand('get-available-space', { path: this.installPath });
+            this.availableSpace = spaceInfo?.availableSpace || 0;
+            this.updateSummary();
+        } catch (error) {
+            console.error('Failed to browse install path:', error);
+        }
     }
 
     showDetectionLoading() {
@@ -412,6 +466,7 @@ class ComponentSelectionPopup {
 
         const downloadSizeEl = this.popup.querySelector('#download-size');
         const availableSpaceEl = this.popup.querySelector('#available-space');
+        const applyBtn = this.popup.querySelector('.btn-apply');
 
         downloadSizeEl.textContent = `${projectedSizeGB} GB`;
         downloadSizeEl.classList.remove('loading');
@@ -425,6 +480,10 @@ class ComponentSelectionPopup {
             availableSpaceEl.classList.add('error');
         } else {
             availableSpaceEl.classList.remove('error');
+        }
+
+        if (applyBtn) {
+            applyBtn.disabled = this.requiresInstallPath() && !this.installPath;
         }
     }
 
@@ -469,6 +528,24 @@ class ComponentSelectionPopup {
 
                 // User clicked Cancel (button index 0)
                 if (result === 0) {
+                    return;
+                }
+            }
+
+            if (shouldStartDownload) {
+                if (!this.installPath) {
+                    this.showError(this.t('popup.componentSelection.installPathRequiredBody'));
+                    return;
+                }
+
+                const pathSet = await window.executeCommand('set-game-path', {
+                    game: this.currentGame,
+                    path: this.installPath,
+                    existing_install: false
+                });
+
+                if (!pathSet) {
+                    this.showError(this.t('popup.componentSelection.installPathSaveFailed'));
                     return;
                 }
             }
